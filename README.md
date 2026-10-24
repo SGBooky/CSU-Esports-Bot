@@ -7,14 +7,17 @@ TypeScript Discord bot that lets members pick one of four form types from a drop
 1. NECC Discord connected
 2. Screenshot of joining the NECC Discord
 3. Confirmation of dues paid
-4. Confirmation of IMLeague forms code
+4. Confirmation of IMLeague forms
 
 ## How it works
 
-1. An admin runs `/setup-forms` in the channel where members should submit.
-2. Members choose a form type from the dropdown.
-3. The bot asks them (privately) to upload a screenshot in that channel within 5 minutes.
-4. When they send an image, the bot posts it to your submissions channel with who submitted and which form it was.
+**Preferred (DMs):**
+1. Members open a DM with the bot (or use `/submit`).
+2. They choose a form type from the dropdown.
+3. They upload a screenshot in the DM within 5 minutes.
+4. The bot posts it to your staff submissions channel.
+
+**Optional (server channel):** An admin can still run `/setup-forms` to post the same menu in a channel.
 
 ## Setup
 
@@ -40,7 +43,11 @@ That grants: View Channels, Send Messages, Embed Links, Attach Files, Read Messa
 With **Developer Mode** on (Discord Settings → Advanced):
 
 - Right-click your server → **Copy Server ID** → `GUILD_ID`
-- Right-click the staff review channel → **Copy Channel ID** → `SUBMISSIONS_CHANNEL_ID`
+- Right-click each staff channel → **Copy Channel ID** → set in `.env`:
+  - `CHANNEL_NECC_DISCORD_CONNECTED` → `#discord-bot-necc-account`
+  - `CHANNEL_NECC_DISCORD_JOIN` → `#discord-bot-necc-discord`
+  - `CHANNEL_DUES_PAID` → `#discord-bot-dues`
+  - `CHANNEL_IMLEAGUE_FORMS` → `#discord-bot-imleagues`
 
 ### 4. Configure the project
 

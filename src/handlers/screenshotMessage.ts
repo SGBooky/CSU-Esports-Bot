@@ -21,7 +21,11 @@ export async function handleScreenshotMessage(
   client: Client,
   message: Message
 ): Promise<void> {
-  if (message.author.bot || !message.guild) {
+  if (message.author.bot) {
+    return;
+  }
+
+  if (!message.channel.isDMBased()) {
     return;
   }
 
@@ -49,13 +53,24 @@ export async function handleScreenshotMessage(
     return;
   }
 
+  let channelId: string;
+  try {
+    channelId = config.getSubmissionChannelId(pending.formType);
+  } catch (error: unknown) {
+    console.error(error);
+    await message.reply(
+      "This form type is not configured with a staff channel yet. Please contact an admin."
+    );
+    return;
+  }
+
   const submissionsChannel = (await client.channels.fetch(
-    config.submissionsChannelId
+    channelId
   )) as TextChannel | null;
 
   if (!submissionsChannel?.isTextBased()) {
     await message.reply(
-      "Could not reach the staff submissions channel. Please contact an admin."
+      "Could not reach the staff submissions channel for this form. Please contact an admin."
     );
     return;
   }
@@ -64,20 +79,19 @@ export async function handleScreenshotMessage(
     .setTitle("New form submission")
     .setColor(0x5865f2)
     .addFields(
-      { name: "Form type", value: `${option.emoji} ${option.label}`, inline: false },
+      {
+        name: "Form type",
+        value: `${option.emoji} ${option.label}`,
+        inline: false,
+      },
       {
         name: "Submitted by",
         value: `${message.author} (\`${message.author.tag}\` / \`${message.author.id}\`)`,
         inline: false,
       },
       {
-        name: "Source channel",
-        value: `<#${message.channelId}>`,
-        inline: true,
-      },
-      {
-        name: "Message link",
-        value: `[Jump to message](${message.url})`,
+        name: "Submitted via",
+        value: "Direct Message",
         inline: true,
       }
     )
@@ -93,13 +107,12 @@ export async function handleScreenshotMessage(
   }
 
   const buffer = Buffer.from(await response.arrayBuffer());
-  const file = new AttachmentBuilder(buffer, {
-    name: image.name ?? "screenshot.png",
-  });
+  const fileName = image.name ?? "screenshot.png";
+  const file = new AttachmentBuilder(buffer, { name: fileName });
 
   await submissionsChannel.send({
     content: `📬 Submission from ${message.author}`,
-    embeds: [embed.setImage(`attachment://${file.name}`)],
+    embeds: [embed.setImage(`attachment://${fileName}`)],
     files: [file],
   });
 
